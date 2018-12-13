@@ -40,7 +40,6 @@ void StorageManager::init() {
 	qDebug() << "trying to open " << path << ", " << db.open();
 
 	createTables();
-	addDebugFoods();
 }
 void StorageManager::addFood( QString foodName, uint kjPer100g,
 							  uint gramsPerCup ) {

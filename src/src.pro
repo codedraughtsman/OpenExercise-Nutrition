@@ -23,11 +23,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        storagemanager.cpp
+        storagemanager.cpp \
+    towerwidget.cpp \
+    aggreator.cpp
 
 HEADERS += \
         storagemanager.h \
-        src_global.h 
+        src_global.h \ 
+    towerwidget.h \
+    aggreator.h
 
 unix {
     target.path = /usr/lib

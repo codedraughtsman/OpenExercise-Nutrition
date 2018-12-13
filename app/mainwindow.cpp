@@ -1,11 +1,10 @@
 #include "mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
-	: QMainWindow(parent)
-{
+#include <towerwidget.h>
+
+MainWindow::MainWindow( QWidget *parent ) : QMainWindow( parent ) {
+	QWidget *tower = new TowerWidget( this );
+	setCentralWidget( tower );
 }
 
-MainWindow::~MainWindow()
-{
-
-}
+MainWindow::~MainWindow() {}

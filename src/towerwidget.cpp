@@ -41,9 +41,7 @@ void TowerWidget::reloadData() {
 
 	// get the data for the last date.
 	QSqlQuery query;
-	// query.prepare( "SELECT * FROM portions WHERE timestamp LIKE " +
-	//			   QString( "'" ) + lastDate.toString( DATE_FORMAT ) + "%'" );
-	// query.addBindValue( lastDate.toString( DATE_FORMAT ) + "%" );
+
 	query.prepare( "select foodName,sum( grams ) total from  (SELECT * FROM "
 				   "portions WHERE timestamp LIKE ?)  group by foodName order "
 				   "by total DESC" );
@@ -83,24 +81,33 @@ void TowerWidget::paintTower( QRectF area ) {
 	// for each portion draw a rectangle.
 	// width is the kj per 100 grams.
 	// height is total kj in portion.
-	uint startHeight = 10;
+	float startHeight = area.height();
 	QPainter painter( this );
 	painter.setRenderHint( QPainter::Antialiasing );
-	// uint towerHeight = ( area.height() - 20.0 );
-	// qDebug() << "towerHeight " << towerHeight;
+	float penWidth = 2;
+	QPen pen( Qt::black, penWidth );
+	painter.setPen( pen );
 	for ( auto portion : m_aggeratedPortions ) {
 		uint kj = portion.second;
 		float drawHeight = kj / m_kjPerPixel;
-		// qDebug() << "draw height:" << drawHeight << "kj" << kj;
+		float drawWidth = 80 - penWidth;
+		qDebug() << "draw height:" << drawHeight << "kj" << kj << "startHeight"
+				 << startHeight;
 		QPainterPath path;
-		path.addRoundedRect( QRectF( area.left() + 2, startHeight,
-									 area.left() + 80, drawHeight ),
-							 10, 10 );
-		QPen pen( Qt::black, 2 );
-		painter.setPen( pen );
+		QRectF rect( area.left() + penWidth * 2, startHeight - drawHeight,
+					 drawWidth, drawHeight );
+		path.addRoundedRect( rect, 10, 10 );
+
 		painter.fillPath( path, getColor( portion.first ) );
 		painter.drawPath( path );
-		startHeight += drawHeight;
+
+		// painter.save();
+		// painter.rotate( -90 );
+		painter.drawText( rect, Qt::AlignHCenter | Qt::AlignVCenter,
+						  portion.first );
+		// painter.restore();
+
+		startHeight -= drawHeight;
 	}
 }
 
@@ -144,10 +151,14 @@ void TowerWidget::paintEvent( QPaintEvent *event ) {
 	uint xAxisMargin = 40, yAxisMargin = 30;
 	updateTower();
 	updateZoom( event->rect() );
-	QRectF towerRect = event->rect().adjusted( xAxisMargin, 20, 0, 0 );
+	QRectF towerRect( xAxisMargin, 0, event->rect().width() - xAxisMargin,
+					  event->rect().height() - yAxisMargin );
+	QPainter painter( this );
+	painter.drawRect( towerRect );
 	paintTower( towerRect );
 	paintYAxis(
 		QRectF( 0, 0, xAxisMargin, event->rect().height() - yAxisMargin ) );
 	paintXAxis( QRectF( xAxisMargin, event->rect().height() - yAxisMargin,
-						event->rect().width() - 10, event->rect().height() ) );
+						event->rect().width() - xAxisMargin,
+						event->rect().height() ) );
 }

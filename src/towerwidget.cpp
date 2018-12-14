@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QPaintEvent>
 #include <QPainter>
+#include <QRandomGenerator>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
@@ -61,20 +62,37 @@ void TowerWidget::reloadData() {
 		m_aggeratedPortions.append( QPair<QString, uint>(
 			query.value( 0 ).toString(), query.value( 1 ).toUInt() ) );
 		m_totalKj += query.value( 1 ).toUInt();
+
+		// m_kjPer100g[ query.value( 0 ).toString() ] = query.value( 2
+		// ).toUInt();
 	}
 }
 
 void TowerWidget::updateTower() {}
 
-QColor TowerWidget::getColor( QString id ) {
-	if ( id == "apple" ) {
-		return Qt::blue;
-	} else if ( id == "tomato" ) {
-		return Qt::green;
-	} else if ( id == "banna" ) {
-		return Qt::yellow;
+uint TowerWidget::getKjPer100g( QString id ) {
+	if ( !m_kjPer100g.contains( id ) ) {
+		QSqlQuery query;
+
+		query.prepare(
+			"select foodName,kjPer100g from  food where foodName =?" );
+		query.addBindValue( id );
+		query.exec();
+		query.first(); // select the first valid record.
+
+		m_kjPer100g[ id ] = query.value( 1 ).toUInt();
 	}
-	return Qt::red;
+
+	return m_kjPer100g[ id ];
+}
+
+QColor TowerWidget::getColor( QString id ) {
+	if ( !m_portionColors.contains( id ) ) {
+		m_portionColors[ id ] =
+			QColor::fromRgb( QRandomGenerator::global()->generate() );
+	}
+
+	return m_portionColors[ id ];
 }
 
 void TowerWidget::paintTower( QRectF area ) {
@@ -88,9 +106,15 @@ void TowerWidget::paintTower( QRectF area ) {
 	QPen pen( Qt::black, penWidth );
 	painter.setPen( pen );
 	for ( auto portion : m_aggeratedPortions ) {
+		QString foodName = portion.first;
 		uint kj = portion.second;
-		float drawHeight = kj / m_kjPerPixel;
-		float drawWidth = 80 - penWidth;
+		float drawHeight = kj / m_kjPerPixelXAxis;
+		float drawWidth =
+			( getKjPer100g( foodName ) / ( m_kjPerPixelYAxis * 100 ) ) -
+			penWidth;
+		qDebug() << "draw width" << drawWidth << "getKjPer100g( foodName )"
+				 << getKjPer100g( foodName ) << "m_kjPerPixelYAxis"
+				 << m_kjPerPixelYAxis;
 		qDebug() << "draw height:" << drawHeight << "kj" << kj << "startHeight"
 				 << startHeight;
 		QPainterPath path;
@@ -98,13 +122,12 @@ void TowerWidget::paintTower( QRectF area ) {
 					 drawWidth, drawHeight );
 		path.addRoundedRect( rect, 10, 10 );
 
-		painter.fillPath( path, getColor( portion.first ) );
+		painter.fillPath( path, getColor( foodName ) );
 		painter.drawPath( path );
 
 		// painter.save();
 		// painter.rotate( -90 );
-		painter.drawText( rect, Qt::AlignHCenter | Qt::AlignVCenter,
-						  portion.first );
+		painter.drawText( rect, Qt::AlignHCenter | Qt::AlignVCenter, foodName );
 		// painter.restore();
 
 		startHeight -= drawHeight;
@@ -112,7 +135,8 @@ void TowerWidget::paintTower( QRectF area ) {
 }
 
 void TowerWidget::updateZoom( QRectF drawArea ) {
-	m_kjPerPixel = qMax( 4000u, m_totalKj ) / drawArea.height();
+	m_kjPerPixelXAxis = qMax( 4000u, m_totalKj ) / drawArea.height();
+	m_kjPerPixelYAxis = 0.01; // 1000 / drawArea.width();
 }
 
 void TowerWidget::paintYAxis( QRectF area ) {
@@ -123,13 +147,14 @@ void TowerWidget::paintYAxis( QRectF area ) {
 	painter.setPen( pen );
 	painter.drawLine( area.topRight(), area.bottomRight() );
 	uint gradSize = 100;
-	for ( uint kjGrad = 1; area.height() > ( kjGrad * gradSize ) / m_kjPerPixel;
+	for ( uint kjGrad = 1;
+		  area.height() > ( kjGrad * gradSize ) / m_kjPerPixelXAxis;
 		  kjGrad++ ) {
 		uint totalKj = kjGrad * gradSize;
-		float lineY = area.height() - totalKj / m_kjPerPixel;
+		float lineY = area.height() - totalKj / m_kjPerPixelXAxis;
 
 		uint lineLength = 4;
-		if ( totalKj % 1000 == 0 ) {
+		if ( totalKj % 500 == 0 ) {
 			lineLength = 10;
 			painter.drawText( area.left(), lineY, QString::number( totalKj ) );
 		}

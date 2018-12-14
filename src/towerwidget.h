@@ -3,6 +3,7 @@
 
 #include "aggreator.h"
 
+#include <QMap>
 #include <QWidget>
 
 class TowerWidget : public QWidget {
@@ -12,8 +13,11 @@ class TowerWidget : public QWidget {
 
   private:
 	QVector<QPair<QString, uint>> m_aggeratedPortions;
+	QMap<QString, uint> m_kjPer100g;
+	QMap<QString, QColor> m_portionColors;
+
 	uint m_totalKj;
-	float m_kjPerPixel;
+	float m_kjPerPixelXAxis, m_kjPerPixelYAxis;
 	QColor m_axisColor;
 	// uint getWidth();
 
@@ -34,6 +38,8 @@ class TowerWidget : public QWidget {
 	virtual QSize minimumSizeHint() const override;
 
 	void updateTower();
+
+	uint getKjPer100g( QString id );
 
   protected:
 	virtual void paintEvent( QPaintEvent *event ) override;

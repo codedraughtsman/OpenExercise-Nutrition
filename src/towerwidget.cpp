@@ -146,14 +146,15 @@ void TowerWidget::updateZoom( QRectF drawArea ) {
 		}
 		totalKjWidth += portions.getMaxKjPer100g();
 	}
-	qDebug() << "maxKjTower" << maxKjTower;
+	qDebug() << "maxKjTower" << maxKjTower << "m_portions" << m_portions.size();
 	qDebug() << "drawArea.height()" << drawArea.height() << "drawArea.width()"
 			 << drawArea.width();
 	// m_kjPerPixelHeight = qMax( 4000u, maxKjTower ) / drawArea.height();
 	m_kjPerPixelHeight = maxKjTower / drawArea.height();
 	qDebug() << "m_kjPerPixelHeight" << m_kjPerPixelHeight;
 
-	m_kjPerPixelWidth = totalKjWidth / drawArea.width();
+	m_kjPerPixelWidth = totalKjWidth / ( drawArea.width() -
+										 ( 10.0 * ( m_portions.size() ) - 1 ) );
 	qDebug() << "m_kjPerPixelWidth" << m_kjPerPixelWidth << "totalKjWidth"
 			 << totalKjWidth;
 }
@@ -215,23 +216,25 @@ void TowerWidget::paintXAxis( QRectF area ) {
 	}
 }
 void TowerWidget::paintEvent( QPaintEvent *event ) {
+	QRect area = event->rect();
 	qDebug() << "called paint event";
 	uint xAxisMargin = 40, yAxisMargin = 30;
+	QPointF origin( area.top() - xAxisMargin, area.bottom() - yAxisMargin );
+	QRectF towerRect( xAxisMargin, 5, area.width() - xAxisMargin - 5,
+					  area.height() - yAxisMargin - 5 );
 	updateTower();
-	updateZoom( event->rect() );
+	updateZoom( towerRect );
 	qreal towerXStart = xAxisMargin;
 	for ( PortionCollection portion : m_portions ) {
 		qreal towerWidth = convertKjToPixelsWidth( portion.getMaxKjPer100g() );
 		QRectF towerRect( towerXStart, 0, towerWidth,
-						  event->rect().height() - yAxisMargin );
+						  area.height() - yAxisMargin );
 		QPainter painter( this );
 		painter.drawRect( towerRect );
 		paintTower( towerRect, portion );
 		towerXStart += towerWidth + 10;
 	}
-	paintYAxis(
-		QRectF( 0, 0, xAxisMargin, event->rect().height() - yAxisMargin ) );
-	paintXAxis( QRectF( xAxisMargin, event->rect().height() - yAxisMargin,
-						event->rect().width() - xAxisMargin,
-						event->rect().height() ) );
+	paintYAxis( QRectF( 0, 0, xAxisMargin, area.height() - yAxisMargin ) );
+	paintXAxis( QRectF( xAxisMargin, area.height() - yAxisMargin,
+						area.width() - xAxisMargin, area.height() ) );
 }

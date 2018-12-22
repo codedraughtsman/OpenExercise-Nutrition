@@ -53,7 +53,9 @@ QVector<QDate> TowerWidget::getLastNDates( uint n ) {
 PortionCollection TowerWidget::loadPortion( QDate date ) {
 	QSqlQuery query;
 
-	query.prepare( "select foodName,sum( grams ) total from  (SELECT * FROM "
+	query.prepare( "select foodName, " //(select kjPer100g from food where
+									   // foodName=foodName)"
+				   "sum( grams ) total from  (SELECT * FROM "
 				   "portions WHERE timestamp LIKE ?)  group by foodName order "
 				   "by total DESC" );
 	query.addBindValue( date.toString( DATE_FORMAT ) + "%" );
@@ -66,10 +68,12 @@ PortionCollection TowerWidget::loadPortion( QDate date ) {
 
 	PortionCollection portions;
 	while ( query.next() ) {
-		qDebug() << query.value( 0 ) << query.value( 1 )
-				 << "query.value( 1 ).toUInt()" << query.value( 1 ).toUInt();
-		portions.addPortion( query.value( 0 ).toString(),
-							 query.value( 1 ).toUInt() );
+		QString foodName = query.value( 0 ).toString();
+		uint grams = query.value( 1 ).toUInt();
+		uint kj = StorageManager::getKjPer100g( foodName ) * grams / 100;
+		qDebug() << "foodName" << foodName << " grams " << grams << ", kj "
+				 << kj;
+		portions.addPortion( foodName, grams );
 	}
 	return portions;
 }
@@ -77,7 +81,7 @@ void TowerWidget::reloadData() {
 	// load the last 7 days of portions.
 	m_portions.clear();
 	for ( QDate date : getLastNDates( 7 ) ) {
-
+		qDebug() << "loading date:" << date.toString();
 		m_portions.append( loadPortion( date ) );
 	}
 }
@@ -93,7 +97,7 @@ QColor TowerWidget::getColor( QString id ) {
 	return m_portionColors[ id ];
 }
 
-void TowerWidget::paintTower( QRectF area ) {
+void TowerWidget::paintTower( QRectF area, PortionCollection &portions ) {
 	// for each portion draw a rectangle.
 	// width is the kj per 100 grams.
 	// height is total kj in portion.
@@ -103,16 +107,17 @@ void TowerWidget::paintTower( QRectF area ) {
 	float penWidth = 2;
 	QPen pen( Qt::black, penWidth );
 	painter.setPen( pen );
-	for ( auto portion : m_portions[ 0 ].getPortions() ) {
-		QString foodName = portion.first;
-		uint kj = portion.second;
-		float drawHeight = kj / m_kjPerPixelXAxis;
-		float drawWidth = ( StorageManager::getKjPer100g( foodName ) /
-							( m_kjPerPixelYAxis * 100 ) ) -
-						  penWidth;
+	for ( Portion portion : portions.getPortions() ) {
+		QString foodName = portion.getFoodName();
+		uint kj = portion.getKj();
+		float drawHeight = convertKjToPixelsHeight( kj );
+		float drawWidth =
+			convertKjToPixelsWidth( StorageManager::getKjPer100g( foodName ) ) -
+			penWidth;
+		qDebug() << "\nfoodName" << foodName;
 		qDebug() << "draw width" << drawWidth << "getKjPer100g( foodName )"
 				 << StorageManager::getKjPer100g( foodName )
-				 << "m_kjPerPixelYAxis" << m_kjPerPixelYAxis;
+				 << "m_kjPerPixelYAxis" << m_kjPerPixelHeight;
 		qDebug() << "draw height:" << drawHeight << "kj" << kj << "startHeight"
 				 << startHeight;
 		QPainterPath path;
@@ -133,8 +138,32 @@ void TowerWidget::paintTower( QRectF area ) {
 }
 
 void TowerWidget::updateZoom( QRectF drawArea ) {
-	m_kjPerPixelXAxis = qMax( 4000u, 0u ) / drawArea.height();
-	m_kjPerPixelYAxis = 0.01; // 1000 / drawArea.width();
+	uint maxKjTower = 0, totalKjWidth = 0;
+	for ( PortionCollection portions : m_portions ) {
+		qDebug() << "portions.getTotalKj() " << portions.getTotalKj();
+		if ( portions.getTotalKj() > maxKjTower ) {
+			maxKjTower = portions.getTotalKj();
+		}
+		totalKjWidth += portions.getMaxKjPer100g();
+	}
+	qDebug() << "maxKjTower" << maxKjTower;
+	qDebug() << "drawArea.height()" << drawArea.height() << "drawArea.width()"
+			 << drawArea.width();
+	// m_kjPerPixelHeight = qMax( 4000u, maxKjTower ) / drawArea.height();
+	m_kjPerPixelHeight = maxKjTower / drawArea.height();
+	qDebug() << "m_kjPerPixelHeight" << m_kjPerPixelHeight;
+
+	m_kjPerPixelWidth = totalKjWidth / drawArea.width();
+	qDebug() << "m_kjPerPixelWidth" << m_kjPerPixelWidth << "totalKjWidth"
+			 << totalKjWidth;
+}
+
+float TowerWidget::convertKjToPixelsWidth( uint kj ) {
+	return kj / m_kjPerPixelWidth;
+}
+
+float TowerWidget::convertKjToPixelsHeight( uint kj ) {
+	return kj / m_kjPerPixelHeight;
 }
 
 void TowerWidget::paintYAxis( QRectF area ) {
@@ -146,10 +175,10 @@ void TowerWidget::paintYAxis( QRectF area ) {
 	painter.drawLine( area.topRight(), area.bottomRight() );
 	uint gradSize = 100;
 	for ( uint kjGrad = 1;
-		  area.height() > ( kjGrad * gradSize ) / m_kjPerPixelXAxis;
+		  area.height() > convertKjToPixelsHeight( kjGrad * gradSize );
 		  kjGrad++ ) {
 		uint totalKj = kjGrad * gradSize;
-		float lineY = area.height() - totalKj / m_kjPerPixelXAxis;
+		float lineY = area.height() - convertKjToPixelsHeight( totalKj );
 
 		uint lineLength = 4;
 		if ( totalKj % 500 == 0 ) {
@@ -168,17 +197,38 @@ void TowerWidget::paintXAxis( QRectF area ) {
 	QPen pen( m_axisColor, 1 );
 	painter.setPen( pen );
 	painter.drawLine( area.topLeft(), area.topRight() );
+	uint gradSize = 100;
+	for ( uint kjGrad = 1;
+		  area.width() > convertKjToPixelsWidth( kjGrad * gradSize );
+		  kjGrad++ ) {
+		uint totalKj = kjGrad * gradSize;
+		float lineX = area.left() + convertKjToPixelsWidth( totalKj );
+
+		uint lineLength = 4;
+		if ( totalKj % 500 == 0 ) {
+			lineLength = 10;
+			// painter.drawText( lineX, area.top() + lineLength,
+			//				  QString::number( totalKj ) );
+		}
+
+		painter.drawLine( lineX, area.top(), lineX, area.top() + lineLength );
+	}
 }
 void TowerWidget::paintEvent( QPaintEvent *event ) {
 	qDebug() << "called paint event";
 	uint xAxisMargin = 40, yAxisMargin = 30;
 	updateTower();
 	updateZoom( event->rect() );
-	QRectF towerRect( xAxisMargin, 0, event->rect().width() - xAxisMargin,
-					  event->rect().height() - yAxisMargin );
-	QPainter painter( this );
-	painter.drawRect( towerRect );
-	paintTower( towerRect );
+	qreal towerXStart = xAxisMargin;
+	for ( PortionCollection portion : m_portions ) {
+		qreal towerWidth = convertKjToPixelsWidth( portion.getMaxKjPer100g() );
+		QRectF towerRect( towerXStart, 0, towerWidth,
+						  event->rect().height() - yAxisMargin );
+		QPainter painter( this );
+		painter.drawRect( towerRect );
+		paintTower( towerRect, portion );
+		towerXStart += towerWidth + 10;
+	}
 	paintYAxis(
 		QRectF( 0, 0, xAxisMargin, event->rect().height() - yAxisMargin ) );
 	paintXAxis( QRectF( xAxisMargin, event->rect().height() - yAxisMargin,

@@ -16,14 +16,14 @@ class TowerWidget : public QWidget {
 	QVector<PortionCollection> m_portions;
 	QMap<QString, QColor> m_portionColors;
 
-	float m_kjPerPixelXAxis, m_kjPerPixelYAxis;
+	float m_kjPerPixelWidth, m_kjPerPixelHeight;
 	QColor m_axisColor;
 	// uint getWidth();
 
 	QDate getLastDate();
 	void reloadData();
 	QColor getColor( QString id );
-	void paintTower( QRectF area );
+	void paintTower( QRectF area, PortionCollection &portions );
 	void updateZoom( QRectF drawArea );
 	void paintYAxis( QRectF area );
 	void paintXAxis( QRectF area );
@@ -41,6 +41,10 @@ class TowerWidget : public QWidget {
 	QVector<QDate> getLastNDates( uint n );
 
 	PortionCollection loadPortion( QDate date );
+
+	float convertKjToPixelsWidth( uint kj );
+
+	float convertKjToPixelsHeight( uint kj );
 
   protected:
 	virtual void paintEvent( QPaintEvent *event ) override;

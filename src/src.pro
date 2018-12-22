@@ -26,14 +26,16 @@ SOURCES += \
         storagemanager.cpp \
     towerwidget.cpp \
     aggreator.cpp \
-    portioncollection.cpp
+    portioncollection.cpp \
+    portion.cpp
 
 HEADERS += \
         storagemanager.h \
         src_global.h \ 
     towerwidget.h \
     aggreator.h \
-    portioncollection.h
+    portioncollection.h \
+    portion.h
 
 unix {
     target.path = /usr/lib

@@ -3,6 +3,8 @@
 
 #include "src_global.h"
 
+#include <QMap>
+
 class SRCSHARED_EXPORT StorageManager {
 
   public:
@@ -12,8 +14,11 @@ class SRCSHARED_EXPORT StorageManager {
 
 	static void addPortion( QString foodName, uint grams );
 
+	static uint getKjPer100g( QString id );
+
   private:
 	StorageManager() {}
+	static QMap<QString, uint> m_kjPer100gMap;
 	static void createTables();
 };
 

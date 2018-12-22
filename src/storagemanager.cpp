@@ -6,6 +6,8 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+QMap<QString, uint> StorageManager::m_kjPer100gMap;
+
 void StorageManager::createTables() {
 	QSqlQuery query;
 	query.exec( "CREATE TABLE IF NOT EXISTS food "
@@ -70,4 +72,20 @@ void StorageManager::addPortion( QString foodName, uint grams ) {
 		qDebug() << "trying to add food:" << foodName << " failed. "
 				 << query.lastError().text();
 	}
+}
+
+uint StorageManager::getKjPer100g( QString id ) {
+	if ( !m_kjPer100gMap.contains( id ) ) {
+		QSqlQuery query;
+
+		query.prepare(
+			"select foodName,kjPer100g from  food where foodName =?" );
+		query.addBindValue( id );
+		query.exec();
+		query.first(); // select the first valid record.
+
+		m_kjPer100gMap[ id ] = query.value( 1 ).toUInt();
+	}
+
+	return m_kjPer100gMap[ id ];
 }

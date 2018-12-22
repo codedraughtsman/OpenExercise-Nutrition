@@ -2,6 +2,7 @@
 #define TOWERWIDGET_H
 
 #include "aggreator.h"
+#include "portioncollection.h"
 
 #include <QMap>
 #include <QWidget>
@@ -12,11 +13,9 @@ class TowerWidget : public QWidget {
 	TowerWidget( QWidget *parent = nullptr );
 
   private:
-	QVector<QPair<QString, uint>> m_aggeratedPortions;
-	QMap<QString, uint> m_kjPer100g;
+	QVector<PortionCollection> m_portions;
 	QMap<QString, QColor> m_portionColors;
 
-	uint m_totalKj;
 	float m_kjPerPixelXAxis, m_kjPerPixelYAxis;
 	QColor m_axisColor;
 	// uint getWidth();
@@ -39,7 +38,9 @@ class TowerWidget : public QWidget {
 
 	void updateTower();
 
-	uint getKjPer100g( QString id );
+	QVector<QDate> getLastNDates( uint n );
+
+	PortionCollection loadPortion( QDate date );
 
   protected:
 	virtual void paintEvent( QPaintEvent *event ) override;

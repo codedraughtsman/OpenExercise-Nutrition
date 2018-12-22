@@ -1,4 +1,6 @@
 #include "towerwidget.h"
+#include "portioncollection.h"
+#include "storagemanager.h"
 
 #include <QDate>
 #include <QDebug>
@@ -13,7 +15,7 @@
 #define DATE_FORMAT_INPUT "yyyy'-'MM'-'dd"
 
 TowerWidget::TowerWidget( QWidget *parent )
-	: QWidget( parent ), m_totalKj( 0 ), m_axisColor( Qt::blue ) {
+	: QWidget( parent ), m_axisColor( Qt::blue ) {
 	reloadData();
 }
 
@@ -32,59 +34,55 @@ QDate TowerWidget::getLastDate() {
 	qDebug() << "last date is: " << lastDate.toString( DATE_FORMAT );
 	return lastDate;
 }
+QVector<QDate> TowerWidget::getLastNDates( uint n ) {
+	QSqlQuery query;
+	query.prepare( "SELECT DISTINCT strftime('%Y-%m-%d',timestamp) FROM "
+				   "portions ORDER BY timestamp DESC LIMIT ?" );
+	query.addBindValue( n );
+	query.exec();
+	QVector<QDate> dates;
+	while ( query.next() ) {
+		QString dateString = query.value( 0 ).toString();
+		dates.append( QDate::fromString( dateString, DATE_FORMAT_INPUT ) );
+	}
+	return dates;
+}
 // select foodName,sum( grams ) total from  (SELECT * FROM portions WHERE
 // timestamp LIKE '2018-12-12%')  group by foodName order by total DESC
 
-void TowerWidget::reloadData() {
-
-	// get the latest data from the database.
-	QDate lastDate = getLastDate();
-
-	// get the data for the last date.
+PortionCollection TowerWidget::loadPortion( QDate date ) {
 	QSqlQuery query;
 
 	query.prepare( "select foodName,sum( grams ) total from  (SELECT * FROM "
 				   "portions WHERE timestamp LIKE ?)  group by foodName order "
 				   "by total DESC" );
-	query.addBindValue( lastDate.toString( DATE_FORMAT ) + "%" );
+	query.addBindValue( date.toString( DATE_FORMAT ) + "%" );
 
 	bool sucessful = query.exec();
-	qDebug() << "last date is: " << lastDate.toString( DATE_FORMAT )
-			 << " sucessful " << sucessful;
-	qDebug() << "running:" << query.lastQuery() << query.executedQuery() << ", "
-			 << query.lastError();
 
-	qDebug() << "nunber of rows: " << query.size(); // does not support size.
-	m_totalKj = 0;
+	if ( !sucessful ) {
+		qDebug() << "failed to load portions";
+	}
+
+	PortionCollection portions;
 	while ( query.next() ) {
 		qDebug() << query.value( 0 ) << query.value( 1 )
 				 << "query.value( 1 ).toUInt()" << query.value( 1 ).toUInt();
-		m_aggeratedPortions.append( QPair<QString, uint>(
-			query.value( 0 ).toString(), query.value( 1 ).toUInt() ) );
-		m_totalKj += query.value( 1 ).toUInt();
+		portions.addPortion( query.value( 0 ).toString(),
+							 query.value( 1 ).toUInt() );
+	}
+	return portions;
+}
+void TowerWidget::reloadData() {
+	// load the last 7 days of portions.
+	m_portions.clear();
+	for ( QDate date : getLastNDates( 7 ) ) {
 
-		// m_kjPer100g[ query.value( 0 ).toString() ] = query.value( 2
-		// ).toUInt();
+		m_portions.append( loadPortion( date ) );
 	}
 }
 
 void TowerWidget::updateTower() {}
-
-uint TowerWidget::getKjPer100g( QString id ) {
-	if ( !m_kjPer100g.contains( id ) ) {
-		QSqlQuery query;
-
-		query.prepare(
-			"select foodName,kjPer100g from  food where foodName =?" );
-		query.addBindValue( id );
-		query.exec();
-		query.first(); // select the first valid record.
-
-		m_kjPer100g[ id ] = query.value( 1 ).toUInt();
-	}
-
-	return m_kjPer100g[ id ];
-}
 
 QColor TowerWidget::getColor( QString id ) {
 	if ( !m_portionColors.contains( id ) ) {
@@ -105,16 +103,16 @@ void TowerWidget::paintTower( QRectF area ) {
 	float penWidth = 2;
 	QPen pen( Qt::black, penWidth );
 	painter.setPen( pen );
-	for ( auto portion : m_aggeratedPortions ) {
+	for ( auto portion : m_portions[ 0 ].getPortions() ) {
 		QString foodName = portion.first;
 		uint kj = portion.second;
 		float drawHeight = kj / m_kjPerPixelXAxis;
-		float drawWidth =
-			( getKjPer100g( foodName ) / ( m_kjPerPixelYAxis * 100 ) ) -
-			penWidth;
+		float drawWidth = ( StorageManager::getKjPer100g( foodName ) /
+							( m_kjPerPixelYAxis * 100 ) ) -
+						  penWidth;
 		qDebug() << "draw width" << drawWidth << "getKjPer100g( foodName )"
-				 << getKjPer100g( foodName ) << "m_kjPerPixelYAxis"
-				 << m_kjPerPixelYAxis;
+				 << StorageManager::getKjPer100g( foodName )
+				 << "m_kjPerPixelYAxis" << m_kjPerPixelYAxis;
 		qDebug() << "draw height:" << drawHeight << "kj" << kj << "startHeight"
 				 << startHeight;
 		QPainterPath path;
@@ -135,7 +133,7 @@ void TowerWidget::paintTower( QRectF area ) {
 }
 
 void TowerWidget::updateZoom( QRectF drawArea ) {
-	m_kjPerPixelXAxis = qMax( 4000u, m_totalKj ) / drawArea.height();
+	m_kjPerPixelXAxis = qMax( 4000u, 0u ) / drawArea.height();
 	m_kjPerPixelYAxis = 0.01; // 1000 / drawArea.width();
 }
 

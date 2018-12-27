@@ -3,13 +3,14 @@
 
 #include <QMainWindow>
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
 	Q_OBJECT
 
-public:
-	MainWindow(QWidget *parent = 0);
+  public:
+	MainWindow( QWidget *parent = 0 );
 	~MainWindow();
+  public slots:
+	void createAddPortion();
 };
 
 #endif // MAINWINDOW_H

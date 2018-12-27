@@ -27,7 +27,8 @@ SOURCES += \
     towerwidget.cpp \
     aggreator.cpp \
     portioncollection.cpp \
-    portion.cpp
+    portion.cpp \
+    portionadder.cpp
 
 HEADERS += \
         storagemanager.h \
@@ -35,9 +36,13 @@ HEADERS += \
     towerwidget.h \
     aggreator.h \
     portioncollection.h \
-    portion.h
+    portion.h \
+    portionadder.h
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+FORMS += \
+    portionadder.ui

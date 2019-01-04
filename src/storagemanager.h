@@ -4,22 +4,27 @@
 #include "src_global.h"
 
 #include <QMap>
+#include <QObject>
 
-class SRCSHARED_EXPORT StorageManager {
-
+class SRCSHARED_EXPORT StorageManager : public QObject {
+	Q_OBJECT
   public:
 	static void init();
 
-	static void addFood( QString foodName, uint kjPer100g, uint gramsPerCup );
+	void addFood( QString foodName, uint kjPer100g, uint gramsPerCup );
 
-	static void addPortion( QString foodName, uint grams );
+	void addPortion( QString foodName, uint grams );
 
 	static uint getKjPer100g( QString id );
+	static StorageManager &instance();
 
   private:
 	StorageManager() {}
 	static QMap<QString, uint> m_kjPer100gMap;
 	static void createTables();
+
+  signals:
+	void dataChanged();
 };
 
 #endif // STORAGEMANAGER_H

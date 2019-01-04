@@ -20,18 +20,6 @@ void StorageManager::createTables() {
 				"grams INTEGER)" );
 }
 
-void addDebugFoods() {
-	StorageManager::addFood( "apple", 300, 100 );
-	StorageManager::addFood( "tomato", 150, 150 );
-	StorageManager::addFood( "banna", 700, 300 );
-
-	StorageManager::addPortion( "apple", 400 );
-	StorageManager::addPortion( "tomato", 200 );
-	StorageManager::addPortion( "banna", 1000 );
-
-	StorageManager::addPortion( "apple", 150 );
-}
-
 void StorageManager::init() {
 	// create DB path
 	QString path = QDir::home().filePath( ".openExercise/nutrition.db" );
@@ -57,6 +45,7 @@ void StorageManager::addFood( QString foodName, uint kjPer100g,
 		qDebug() << "last query was: " << query.lastQuery();
 		qDebug() << "trying to add food:" << foodName << " failed. "
 				 << query.lastError().text();
+		return;
 	}
 }
 void StorageManager::addPortion( QString foodName, uint grams ) {
@@ -71,7 +60,10 @@ void StorageManager::addPortion( QString foodName, uint grams ) {
 		qDebug() << "last query was: " << query.lastQuery();
 		qDebug() << "trying to add food:" << foodName << " failed. "
 				 << query.lastError().text();
+		return;
 	}
+	emit dataChanged();
+	qDebug() << "emiting datachanged " << this;
 }
 
 uint StorageManager::getKjPer100g( QString id ) {
@@ -88,4 +80,9 @@ uint StorageManager::getKjPer100g( QString id ) {
 	}
 
 	return m_kjPer100gMap[ id ];
+}
+
+StorageManager &StorageManager::instance() {
+	static StorageManager *inst = new StorageManager();
+	return *inst;
 }

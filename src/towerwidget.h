@@ -21,7 +21,7 @@ class TowerWidget : public QWidget {
 	// uint getWidth();
 
 	QDate getLastDate();
-	void reloadData();
+
 	QColor getColor( QString id );
 	void paintTower( QRectF area, PortionCollection &portions );
 	void updateZoom( QRectF drawArea );
@@ -30,7 +30,7 @@ class TowerWidget : public QWidget {
   signals:
 
   public slots:
-
+	void reloadData();
 	// QWidget interface
   public:
 	virtual QSize sizeHint() const override;

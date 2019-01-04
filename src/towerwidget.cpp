@@ -7,6 +7,7 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <QRandomGenerator>
+#include <QSqlDriver>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
@@ -16,6 +17,10 @@
 
 TowerWidget::TowerWidget( QWidget *parent )
 	: QWidget( parent ), m_axisColor( Qt::blue ) {
+	QSqlDatabase db = QSqlDatabase::database();
+	db.driver()->subscribeToNotification( "someEventId" );
+	connect( &StorageManager::instance(), &StorageManager::dataChanged, this,
+			 &TowerWidget::reloadData );
 	reloadData();
 }
 
@@ -84,6 +89,8 @@ void TowerWidget::reloadData() {
 		qDebug() << "loading date:" << date.toString();
 		m_portions.append( loadPortion( date ) );
 	}
+	// redraw the screen.
+	this->repaint();
 }
 
 void TowerWidget::updateTower() {}

@@ -7,15 +7,17 @@ namespace Ui {
 class PortionAdder;
 }
 
-class PortionAdder : public QDialog
-{
+class PortionAdder : public QDialog {
 	Q_OBJECT
 
-public:
-	explicit PortionAdder(QWidget *parent = 0);
+  public:
+	explicit PortionAdder( QWidget *parent = 0 );
 	~PortionAdder();
 
-private:
+  protected slots:
+	void onTableClicked( const QModelIndex &index );
+
+  private:
 	Ui::PortionAdder *ui;
 };
 

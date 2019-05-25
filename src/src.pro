@@ -28,7 +28,8 @@ SOURCES += \
     aggreator.cpp \
     portioncollection.cpp \
     portion.cpp \
-    portionadder.cpp
+    portionadder.cpp \
+    addfooddialog.cpp
 
 HEADERS += \
         storagemanager.h \
@@ -37,7 +38,8 @@ HEADERS += \
     aggreator.h \
     portioncollection.h \
     portion.h \
-    portionadder.h
+    portionadder.h \
+    addfooddialog.h
 
 unix {
     target.path = /usr/lib
@@ -45,4 +47,5 @@ unix {
 }
 
 FORMS += \
-    portionadder.ui
+    portionadder.ui \
+    addfooddialog.ui

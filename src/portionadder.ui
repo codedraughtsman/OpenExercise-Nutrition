@@ -57,7 +57,7 @@
       <item>
        <widget class="QLabel" name="statusMessageLabel">
         <property name="text">
-         <string>status message</string>
+         <string>Double click on a food to add it.</string>
         </property>
        </widget>
       </item>

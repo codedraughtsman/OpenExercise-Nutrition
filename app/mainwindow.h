@@ -11,6 +11,7 @@ class MainWindow : public QMainWindow {
 	~MainWindow();
   public slots:
 	void createAddPortion();
+	void createAddFood();
 };
 
 #endif // MAINWINDOW_H

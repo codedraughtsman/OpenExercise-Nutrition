@@ -1,5 +1,6 @@
 #include "storagemanager.h"
 
+#include <QDateTime>
 #include <QDebug>
 #include <QDir>
 #include <QSqlDatabase>
@@ -50,8 +51,10 @@ void StorageManager::addFood( QString foodName, uint kjPer100g,
 }
 void StorageManager::addPortion( QString foodName, uint grams ) {
 	QSqlQuery query;
-	query.prepare( "INSERT INTO portions (foodName, grams) "
-				   "Values ( ? , ?) " );
+	query.prepare( "INSERT INTO portions (timestamp,foodName, grams) "
+				   "Values (?, ? , ?) " );
+	query.addBindValue(
+		QDateTime::currentDateTime().toString( "yyyy-MM-dd hh:mm:ss" ) );
 	query.addBindValue( foodName );
 	query.addBindValue( grams );
 	bool sucessful = query.exec();

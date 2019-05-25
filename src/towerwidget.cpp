@@ -36,7 +36,7 @@ QDate TowerWidget::getLastDate() {
 
 	QString dateString = query.value( 0 ).toString().section( " ", 0, 0 );
 	QDate lastDate = QDate::fromString( dateString, DATE_FORMAT_INPUT );
-	qDebug() << "last date is: " << lastDate.toString( DATE_FORMAT );
+	// qDebug() << "last date is: " << lastDate.toString( DATE_FORMAT );
 	return lastDate;
 }
 QVector<QDate> TowerWidget::getLastNDates( uint n ) {
@@ -76,8 +76,8 @@ PortionCollection TowerWidget::loadPortion( QDate date ) {
 		QString foodName = query.value( 0 ).toString();
 		uint grams = query.value( 1 ).toUInt();
 		uint kj = StorageManager::getKjPer100g( foodName ) * grams / 100;
-		qDebug() << "foodName" << foodName << " grams " << grams << ", kj "
-				 << kj;
+		// qDebug() << "foodName" << foodName << " grams " << grams << ", kj "
+		//		 << kj;
 		portions.addPortion( foodName, grams );
 	}
 	return portions;
@@ -86,7 +86,7 @@ void TowerWidget::reloadData() {
 	// load the last 7 days of portions.
 	m_portions.clear();
 	for ( QDate date : getLastNDates( 7 ) ) {
-		qDebug() << "loading date:" << date.toString();
+		qDebug() << "reloading date:" << date.toString();
 		m_portions.append( loadPortion( date ) );
 	}
 	// redraw the screen.
@@ -121,12 +121,13 @@ void TowerWidget::paintTower( QRectF area, PortionCollection &portions ) {
 		float drawWidth =
 			convertKjToPixelsWidth( StorageManager::getKjPer100g( foodName ) ) -
 			penWidth;
-		qDebug() << "\nfoodName" << foodName;
+		/*qDebug() << "\nfoodName" << foodName;
 		qDebug() << "draw width" << drawWidth << "getKjPer100g( foodName )"
 				 << StorageManager::getKjPer100g( foodName )
 				 << "m_kjPerPixelYAxis" << m_kjPerPixelHeight;
 		qDebug() << "draw height:" << drawHeight << "kj" << kj << "startHeight"
 				 << startHeight;
+		*/
 		QPainterPath path;
 		QRectF rect( area.left() + penWidth * 2, startHeight - drawHeight,
 					 drawWidth, drawHeight );
@@ -137,7 +138,18 @@ void TowerWidget::paintTower( QRectF area, PortionCollection &portions ) {
 
 		// painter.save();
 		// painter.rotate( -90 );
-		painter.drawText( rect, Qt::AlignHCenter | Qt::AlignVCenter, foodName );
+		uint textWidth = painter.fontMetrics().width( foodName );
+		if ( textWidth < rect.width() ) {
+			// draw inside rect.
+			painter.drawText( rect, Qt::AlignHCenter | Qt::AlignVCenter,
+							  foodName );
+		} else {
+			// draw outside rect.
+			QRect outsideRect( rect.right(), rect.top(),
+							   area.width() - rect.width(), rect.height() );
+			painter.drawText( outsideRect, Qt::AlignHCenter | Qt::AlignVCenter,
+							  foodName );
+		}
 		// painter.restore();
 
 		startHeight -= drawHeight;
@@ -147,23 +159,26 @@ void TowerWidget::paintTower( QRectF area, PortionCollection &portions ) {
 void TowerWidget::updateZoom( QRectF drawArea ) {
 	uint maxKjTower = 0, totalKjWidth = 0;
 	for ( PortionCollection portions : m_portions ) {
-		qDebug() << "portions.getTotalKj() " << portions.getTotalKj();
+		// qDebug() << "portions.getTotalKj() " << portions.getTotalKj();
 		if ( portions.getTotalKj() > maxKjTower ) {
 			maxKjTower = portions.getTotalKj();
 		}
 		totalKjWidth += portions.getMaxKjPer100g();
 	}
-	qDebug() << "maxKjTower" << maxKjTower << "m_portions" << m_portions.size();
+	/*qDebug() << "maxKjTower" << maxKjTower << "m_portions" <<
+	m_portions.size();
 	qDebug() << "drawArea.height()" << drawArea.height() << "drawArea.width()"
 			 << drawArea.width();
+	*/
 	// m_kjPerPixelHeight = qMax( 4000u, maxKjTower ) / drawArea.height();
 	m_kjPerPixelHeight = maxKjTower / drawArea.height();
 	qDebug() << "m_kjPerPixelHeight" << m_kjPerPixelHeight;
 
 	m_kjPerPixelWidth = totalKjWidth / ( drawArea.width() -
 										 ( 10.0 * ( m_portions.size() ) - 1 ) );
-	qDebug() << "m_kjPerPixelWidth" << m_kjPerPixelWidth << "totalKjWidth"
+	/*qDebug() << "m_kjPerPixelWidth" << m_kjPerPixelWidth << "totalKjWidth"
 			 << totalKjWidth;
+			 */
 }
 
 float TowerWidget::convertKjToPixelsWidth( uint kj ) {

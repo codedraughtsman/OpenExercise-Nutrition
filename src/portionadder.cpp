@@ -10,6 +10,9 @@
 PortionAdder::PortionAdder( QWidget *parent )
 	: QDialog( parent ), ui( new Ui::PortionAdder ) {
 	ui->setupUi( this );
+
+	ui->dateTimeEdit->setDateTime( QDateTime::currentDateTime() );
+
 	QSqlQueryModel *model = new QSqlQueryModel;
 	model->setQuery( "SELECT foodName, kjPer100g FROM food" );
 	model->setHeaderData( 0, Qt::Horizontal, tr( "Name" ) );
@@ -49,7 +52,8 @@ void PortionAdder::onTableClicked( const QModelIndex &index ) {
 										  "grams of " + foodName, 100, 0,
 										  2147483647, 1, &ok );
 		if ( ok ) {
-			StorageManager::instance().addPortion( foodName, grams );
+			StorageManager::instance().addPortion(
+				foodName, grams, ui->dateTimeEdit->dateTime() );
 			ui->statusMessageLabel->setText( QString( "added %1 grams of %2" )
 												 .arg( grams )
 												 .arg( foodName ) );

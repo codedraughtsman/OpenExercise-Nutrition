@@ -3,6 +3,7 @@
 
 #include "src_global.h"
 
+#include <QDateTime>
 #include <QMap>
 #include <QObject>
 
@@ -13,7 +14,8 @@ class SRCSHARED_EXPORT StorageManager : public QObject {
 
 	void addFood( QString foodName, uint kjPer100g, uint gramsPerCup );
 
-	void addPortion( QString foodName, uint grams );
+	void addPortion( QString foodName, uint grams,
+					 QDateTime dateTime = QDateTime::currentDateTime() );
 
 	static uint getKjPer100g( QString id );
 	static StorageManager &instance();

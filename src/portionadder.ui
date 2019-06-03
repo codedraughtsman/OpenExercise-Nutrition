@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>424</width>
-    <height>340</height>
+    <width>726</width>
+    <height>451</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,6 +32,13 @@
       </item>
       <item>
        <widget class="QLineEdit" name="filterLineEdit"/>
+      </item>
+      <item>
+       <widget class="QDateTimeEdit" name="dateTimeEdit">
+        <property name="calendarPopup">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

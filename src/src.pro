@@ -23,6 +23,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    mainwindow.cpp \
         storagemanager.cpp \
     towerwidget.cpp \
     aggreator.cpp \
@@ -32,6 +33,7 @@ SOURCES += \
     addfooddialog.cpp
 
 HEADERS += \
+        mainwindow.h \
         storagemanager.h \
         src_global.h \ 
     towerwidget.h \
@@ -47,5 +49,6 @@ unix {
 }
 
 FORMS += \
+    mainwindow.ui \
     portionadder.ui \
     addfooddialog.ui

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += widgets sql
+QT       += widgets sql charts
 
 TARGET = src
 TEMPLATE = lib
@@ -23,6 +23,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    linechartview.cpp \
     mainwindow.cpp \
         storagemanager.cpp \
     towerwidget.cpp \
@@ -33,6 +34,7 @@ SOURCES += \
     addfooddialog.cpp
 
 HEADERS += \
+        linechartview.h \
         mainwindow.h \
         storagemanager.h \
         src_global.h \ 

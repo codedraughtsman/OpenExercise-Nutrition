@@ -35,6 +35,16 @@
         <string>Nutrients</string>
        </attribute>
       </widget>
+      <widget class="QWidget" name="lineChartTab">
+       <attribute name="title">
+        <string>Line Chart</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="LineChartView" name="lineChartWidget"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -57,6 +67,11 @@
    <extends>QWidget</extends>
    <header>towerwidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LineChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>linechartview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

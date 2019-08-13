@@ -7,16 +7,17 @@ namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
 	Q_OBJECT
 
-public:
-	explicit MainWindow(QWidget *parent = nullptr);
+  public:
+	explicit MainWindow( QWidget *parent = nullptr );
 	~MainWindow();
 
-private:
+  private:
 	Ui::MainWindow *ui;
+	void createAddPortion();
+	void createAddFood();
 };
 
 #endif // MAINWINDOW_H

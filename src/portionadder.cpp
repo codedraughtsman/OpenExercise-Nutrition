@@ -14,9 +14,18 @@ PortionAdder::PortionAdder( QWidget *parent )
 	ui->dateTimeEdit->setDateTime( QDateTime::currentDateTime() );
 
 	QSqlQueryModel *model = new QSqlQueryModel;
-	model->setQuery( "SELECT foodName, kjPer100g FROM food" );
+	model->setQuery(
+		"select "
+		"foodData.ShortFoodName, "
+		"count( portions.foodName) numOfEntries, "
+		"foodData.Energy kj, "
+		"foodData.Fat, "
+		"foodData.Protein, "
+		"foodData.Carbohydrateavailable "
+		"from foodData "
+		"left join portions on foodData.ShortFoodName = portions.foodName "
+		"group by foodData.ShortFoodName" );
 	model->setHeaderData( 0, Qt::Horizontal, tr( "Name" ) );
-	model->setHeaderData( 1, Qt::Horizontal, tr( "kj/100g" ) );
 	// connect(StorageManager::instance(),
 	// &StorageManager::dataChanged,model,&QSqlQueryModel::);
 	QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel( this );
@@ -27,6 +36,7 @@ PortionAdder::PortionAdder( QWidget *parent )
 
 	ui->tableView->setModel( proxyModel );
 	ui->tableView->setSortingEnabled( true );
+	ui->tableView->sortByColumn( 1, Qt::DescendingOrder );
 
 	connect( ui->filterLineEdit, &QLineEdit::textChanged, proxyModel,
 			 &QSortFilterProxyModel::setFilterWildcard );

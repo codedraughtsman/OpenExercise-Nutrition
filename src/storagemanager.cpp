@@ -35,11 +35,10 @@ void StorageManager::init() {
 void StorageManager::addFood( QString foodName, uint kjPer100g,
 							  uint gramsPerCup ) {
 	QSqlQuery query;
-	query.prepare( "INSERT INTO food (foodName, kjPer100g, gramsPerCup) "
-				   "Values ( ? , ? , ? ) " );
+	query.prepare( "INSERT INTO foodData (ShortFoodName, Energy) "
+				   "Values ( ? , ?  ) " );
 	query.addBindValue( foodName );
 	query.addBindValue( kjPer100g );
-	query.addBindValue( gramsPerCup );
 	bool sucessful = query.exec();
 
 	if ( !sucessful ) {

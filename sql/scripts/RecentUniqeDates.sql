@@ -1,0 +1,1 @@
+select distinct portions.date from portions order by portions.date DESC

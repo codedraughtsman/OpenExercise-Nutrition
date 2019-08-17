@@ -8,6 +8,8 @@
 class LineChartView : public QChartView {
   public:
 	LineChartView( QWidget *parent = nullptr );
+  public slots:
+	void loadLineData();
 };
 
 #endif // LINECHARTVIEW_H

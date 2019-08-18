@@ -51,11 +51,17 @@ void StorageManager::addFood( QString foodName, uint kjPer100g,
 void StorageManager::addPortion( QString foodName, uint grams,
 								 QDateTime dateTime ) {
 	QSqlQuery query;
-	query.prepare( "INSERT INTO portions (timestamp,foodName, grams) "
-				   "Values (?, ? , ?) " );
+	query.prepare(
+		"INSERT INTO portions (timestamp, date, time, foodName, grams) "
+		"Values (?, ?, ?, ? , ?) " );
+
 	query.addBindValue( dateTime.toString( "yyyy-MM-dd hh:mm:ss" ) );
+	query.addBindValue( dateTime.toString( "yyyy-MM-dd" ) );
+	query.addBindValue( dateTime.toString( "hh:mm:ss" ) );
+
 	query.addBindValue( foodName );
 	query.addBindValue( grams );
+
 	bool sucessful = query.exec();
 
 	if ( !sucessful ) {

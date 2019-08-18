@@ -20,6 +20,8 @@ class SRCSHARED_EXPORT StorageManager : public QObject {
 	static uint getKjPer100g( QString id );
 	static StorageManager &instance();
 
+	void addWeight( double weight, QDateTime dateTime );
+
   private:
 	StorageManager() {}
 	static QMap<QString, uint> m_kjPer100gMap;

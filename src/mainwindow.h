@@ -18,6 +18,7 @@ class MainWindow : public QMainWindow {
 	Ui::MainWindow *ui;
 	void createAddPortion();
 	void createAddFood();
+	void createAddWeight();
 };
 
 #endif // MAINWINDOW_H

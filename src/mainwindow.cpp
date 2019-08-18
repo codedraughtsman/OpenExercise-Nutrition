@@ -3,6 +3,7 @@
 
 #include "addfooddialog.h"
 #include "portionadder.h"
+#include "storagemanager.h"
 #include <QToolBar>
 
 MainWindow::MainWindow( QWidget *parent )
@@ -17,12 +18,30 @@ MainWindow::MainWindow( QWidget *parent )
 	connect( addFoodAction, &QAction::triggered, this,
 			 &MainWindow::createAddFood );
 	tools->addAction( addFoodAction );
+
+	QAction *addWeightAction = new QAction( "add weight", this );
+	connect( addWeightAction, &QAction::triggered, this,
+			 &MainWindow::createAddWeight );
+	tools->addAction( addWeightAction );
+
 	addToolBar( tools );
 }
 void MainWindow::createAddPortion() {
 	PortionAdder *p = new PortionAdder();
 	p->show();
 }
+
+void MainWindow::createAddWeight() {
+	bool ok;
+	double weightInKg = QInputDialog::getDouble( this, tr( "quantity of food" ),
+												 "enter weight in Kg", 0, 0,
+												 2147483647, 1, &ok );
+	if ( ok ) {
+		StorageManager::instance().addWeight( weightInKg,
+											  QDateTime::currentDateTime() );
+	}
+}
+
 void MainWindow::createAddFood() {
 	addFoodDialog *p = new addFoodDialog();
 	p->show();

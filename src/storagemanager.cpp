@@ -48,6 +48,31 @@ void StorageManager::addFood( QString foodName, uint kjPer100g,
 		return;
 	}
 }
+
+void StorageManager::addWeight( double weight, QDateTime dateTime ) {
+	QSqlQuery query;
+	query.prepare( "INSERT INTO weight (timestamp, date, time, weight) "
+				   "Values (?, ?, ?, ?) " );
+
+	query.addBindValue( dateTime.toString( "yyyy-MM-dd hh:mm:ss" ) );
+	query.addBindValue( dateTime.toString( "yyyy-MM-dd" ) );
+	query.addBindValue( dateTime.toString( "hh:mm:ss" ) );
+
+	query.addBindValue( weight );
+
+	bool sucessful = query.exec();
+
+	if ( !sucessful ) {
+		qDebug() << "last query was: " << query.lastQuery();
+		qDebug() << "trying to add weight:" << weight << " on "
+				 << "date failed. "
+				 << dateTime.toString( "yyyy-MM-dd hh:mm:ss" )
+				 << query.lastError().text();
+		return;
+	}
+	emit dataChanged();
+}
+
 void StorageManager::addPortion( QString foodName, uint grams,
 								 QDateTime dateTime ) {
 	QSqlQuery query;

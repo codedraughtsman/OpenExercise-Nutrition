@@ -30,8 +30,8 @@ QSize TowerWidget::minimumSizeHint() const { return QSize( 150, 300 ); }
 
 QVector<QDate> TowerWidget::getLastNDates( uint n ) {
 	QSqlQuery query;
-	query.prepare( "SELECT DISTINCT strftime('%Y-%m-%d',timestamp) FROM "
-				   "portions ORDER BY timestamp DESC LIMIT ?" );
+	query.prepare( "select distinct portionsPerDayPerFood.date from "
+				   "portionsPerDayPerFood limit ?" );
 	query.addBindValue( n );
 	query.exec();
 	QVector<QDate> dates;
@@ -41,8 +41,6 @@ QVector<QDate> TowerWidget::getLastNDates( uint n ) {
 	}
 	return dates;
 }
-// select foodName,sum( grams ) total from  (SELECT * FROM portions WHERE
-// timestamp LIKE '2018-12-12%')  group by foodName order by total DESC
 
 PortionCollection TowerWidget::loadPortion( QDate date ) {
 	QSqlQuery query;

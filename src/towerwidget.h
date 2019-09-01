@@ -20,8 +20,6 @@ class TowerWidget : public QWidget {
 	QColor m_axisColor;
 	// uint getWidth();
 
-	QDate getLastDate();
-
 	QColor getColor( QString id );
 	void paintTower( QRectF area, PortionCollection &portions );
 	void updateZoom( QRectF drawArea );

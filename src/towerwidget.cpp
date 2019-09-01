@@ -28,17 +28,6 @@ QSize TowerWidget::sizeHint() const { return QSize( 300, 600 ); }
 
 QSize TowerWidget::minimumSizeHint() const { return QSize( 150, 300 ); }
 
-QDate TowerWidget::getLastDate() {
-	// latest day that contains an entry.
-	QSqlQuery query;
-	query.exec( "SELECT MAX(timestamp) FROM portions;" );
-	query.first(); // select the first valid record.
-
-	QString dateString = query.value( 0 ).toString().section( " ", 0, 0 );
-	QDate lastDate = QDate::fromString( dateString, DATE_FORMAT_INPUT );
-	// qDebug() << "last date is: " << lastDate.toString( DATE_FORMAT );
-	return lastDate;
-}
 QVector<QDate> TowerWidget::getLastNDates( uint n ) {
 	QSqlQuery query;
 	query.prepare( "SELECT DISTINCT strftime('%Y-%m-%d',timestamp) FROM "
@@ -108,6 +97,10 @@ void TowerWidget::paintTower( QRectF area, PortionCollection &portions ) {
 	// height is total kj in portion.
 	float startHeight = area.height();
 	QPainter painter( this );
+
+	// draws outline around the tower.
+	painter.drawRect( area );
+
 	painter.setRenderHint( QPainter::Antialiasing );
 	float penWidth = 2;
 	QPen pen( Qt::black, penWidth );
@@ -249,8 +242,6 @@ void TowerWidget::paintEvent( QPaintEvent *event ) {
 		qreal towerWidth = convertKjToPixelsWidth( portion.getMaxKjPer100g() );
 		QRectF towerRect( towerXStart, 0, towerWidth,
 						  area.height() - yAxisMargin );
-		QPainter painter( this );
-		painter.drawRect( towerRect );
 		paintTower( towerRect, portion );
 		towerXStart += towerWidth + 10;
 	}

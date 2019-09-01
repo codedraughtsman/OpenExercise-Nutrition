@@ -45,12 +45,10 @@ QVector<QDate> TowerWidget::getLastNDates( uint n ) {
 PortionCollection TowerWidget::loadPortion( QDate date ) {
 	QSqlQuery query;
 
-	query.prepare( "select foodName, " //(select kjPer100g from food where
-									   // foodName=foodName)"
-				   "sum( grams ) total from  (SELECT * FROM "
-				   "portions WHERE timestamp LIKE ?)  group by foodName order "
-				   "by total DESC" );
-	query.addBindValue( date.toString( DATE_FORMAT ) + "%" );
+	query.prepare( "select foodName, totalGrams, totalKj from "
+				   "portionsPerDayPerFood where date = ? order by totalKj "
+				   "DESC" );
+	query.addBindValue( date.toString( DATE_FORMAT ) );
 
 	bool sucessful = query.exec();
 

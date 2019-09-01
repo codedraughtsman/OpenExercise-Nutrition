@@ -26,6 +26,7 @@ SOURCES += \
     linechartview.cpp \
     mainwindow.cpp \
         storagemanager.cpp \
+    towerview.cpp \
     towerwidget.cpp \
     aggreator.cpp \
     portioncollection.cpp \
@@ -37,7 +38,8 @@ HEADERS += \
         linechartview.h \
         mainwindow.h \
         storagemanager.h \
-        src_global.h \ 
+        src_global.h \
+        towerview.h \
     towerwidget.h \
     aggreator.h \
     portioncollection.h \

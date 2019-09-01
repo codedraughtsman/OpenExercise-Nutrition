@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "towerview.h"
 #include "ui_mainwindow.h"
 
 #include "addfooddialog.h"
@@ -25,6 +26,10 @@ MainWindow::MainWindow( QWidget *parent )
 	tools->addAction( addWeightAction );
 
 	addToolBar( tools );
+	setupNutritionWindow();
+}
+void MainWindow::setupNutritionWindow() {
+	TowerView *tv = new TowerView( ui->nutrients, "", true );
 }
 void MainWindow::createAddPortion() {
 	PortionAdder *p = new PortionAdder();

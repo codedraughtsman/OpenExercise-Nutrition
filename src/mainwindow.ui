@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="towers">
        <attribute name="title">
@@ -34,6 +34,7 @@
        <attribute name="title">
         <string>Nutrients</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4"/>
       </widget>
       <widget class="QWidget" name="lineChartTab">
        <attribute name="title">

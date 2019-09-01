@@ -29,7 +29,8 @@ MainWindow::MainWindow( QWidget *parent )
 	setupNutritionWindow();
 }
 void MainWindow::setupNutritionWindow() {
-	TowerView *tv = new TowerView( ui->nutrients, "", true );
+	TowerView *tv = new TowerView( ui->scrollAreaWidgetContents, "", true );
+	ui->scrollAreaWidgetContents->layout()->addWidget( tv );
 }
 void MainWindow::createAddPortion() {
 	PortionAdder *p = new PortionAdder();

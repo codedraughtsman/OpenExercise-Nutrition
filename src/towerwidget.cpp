@@ -93,8 +93,6 @@ void TowerWidget::reloadData() {
 	this->repaint();
 }
 
-void TowerWidget::updateTower() {}
-
 QColor TowerWidget::getColor( QString id ) {
 	if ( !m_portionColors.contains( id ) ) {
 		m_portionColors[ id ] =
@@ -244,7 +242,7 @@ void TowerWidget::paintEvent( QPaintEvent *event ) {
 	QPointF origin( area.top() - xAxisMargin, area.bottom() - yAxisMargin );
 	QRectF towerRect( xAxisMargin, 5, area.width() - xAxisMargin - 5,
 					  area.height() - yAxisMargin - 5 );
-	updateTower();
+
 	updateZoom( towerRect );
 	qreal towerXStart = xAxisMargin;
 	for ( PortionCollection portion : m_portions ) {

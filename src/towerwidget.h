@@ -36,8 +36,6 @@ class TowerWidget : public QWidget {
 	virtual QSize sizeHint() const override;
 	virtual QSize minimumSizeHint() const override;
 
-	void updateTower();
-
 	QVector<QDate> getLastNDates( uint n );
 
 	PortionCollection loadPortion( QDate date );

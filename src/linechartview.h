@@ -10,10 +10,13 @@ class LineChartView : public QChartView {
   public:
 	LineChartView( QWidget *parent = nullptr );
   public slots:
-	QLineSeries *loadLineData();
+	QLineSeries *loadLineData( QSqlQuery results );
 
   private:
-	QSqlQuery loadSQL();
+	QVector<QSqlQuery> loadSQL();
+
+	QVector<QLineSeries *> loadData();
+	QSqlQuery runQuery( QString str );
 };
 
 #endif // LINECHARTVIEW_H

@@ -5,6 +5,9 @@
 
 class TowerView : public QWidget {
 	Q_OBJECT
+	QString m_query;
+	bool m_showXAxis;
+
   public:
 	explicit TowerView( QWidget *parent = nullptr, QString query = "",
 						bool showXAxis = true );

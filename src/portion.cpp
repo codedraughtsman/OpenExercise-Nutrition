@@ -3,5 +3,5 @@
 
 Portion::Portion() {}
 
-Portion::Portion( QString foodName, uint xValue, uint yValue )
+Portion::Portion( QString foodName, double xValue, double yValue )
 	: m_foodName( foodName ), m_xValue( xValue ), m_yValue( yValue ) {}

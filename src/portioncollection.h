@@ -13,10 +13,10 @@ class PortionCollection {
 
   public:
 	explicit PortionCollection();
-	void addPortion( QString foodName, uint xValue, uint yValue );
+	void addPortion( QString foodName, double xValue, double yValue );
 	const QVector<Portion> &getPortions();
-	uint getMaxXValue();
-	uint getTotalYValue();
+	double getMaxXValue();
+	double getTotalYValue();
 
   signals:
 

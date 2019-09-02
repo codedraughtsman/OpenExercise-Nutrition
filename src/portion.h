@@ -7,10 +7,10 @@ class Portion {
 
   public:
 	QString m_foodName;
-	uint m_xValue, m_yValue;
+	double m_xValue, m_yValue;
 
 	Portion();
-	Portion( QString foodName, uint xValue, uint yValue );
+	Portion( QString foodName, double xValue, double yValue );
 };
 
 #endif // PORTION_H

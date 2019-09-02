@@ -19,7 +19,7 @@ class TowerWidget : public QWidget {
 	QVector<PortionCollection> m_portions;
 	QMap<QString, QColor> m_portionColors;
 
-	float m_kjPerPixelWidth, m_kjPerPixelHeight;
+	double m_kjPerPixelWidth, m_kjPerPixelHeight;
 	QColor m_axisColor;
 	// uint getWidth();
 
@@ -41,9 +41,9 @@ class TowerWidget : public QWidget {
 
 	PortionCollection loadPortion( QDate date );
 
-	float convertKjToPixelsWidth( uint kj );
+	double convertKjToPixelsWidth( double kj );
 
-	float convertKjToPixelsHeight( uint kj );
+	double convertKjToPixelsHeight( double kj );
 
   protected:
 	virtual void paintEvent( QPaintEvent *event ) override;

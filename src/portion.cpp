@@ -3,12 +3,5 @@
 
 Portion::Portion() {}
 
-Portion::Portion( QString foodName, uint grams )
-	: m_foodName( foodName ), m_grams( grams ) {
-
-	m_kj = ( StorageManager::getKjPer100g( foodName ) * grams ) / 100;
-}
-
-QString Portion::getFoodName() { return m_foodName; }
-
-float Portion::getKj() { return m_kj; }
+Portion::Portion( QString foodName, uint xValue, uint yValue )
+	: m_foodName( foodName ), m_xValue( xValue ), m_yValue( yValue ) {}

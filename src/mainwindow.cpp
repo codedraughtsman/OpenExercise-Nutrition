@@ -29,8 +29,10 @@ MainWindow::MainWindow( QWidget *parent )
 	setupNutritionWindow();
 }
 void MainWindow::setupNutritionWindow() {
-	TowerView *tv = new TowerView( ui->scrollAreaWidgetContents, "", true );
-	ui->scrollAreaWidgetContents->layout()->addWidget( tv );
+	ui->scrollAreaWidgetContents->layout()->addWidget( new TowerWidget(
+		ui->scrollAreaWidgetContents, "proteinPer100Grams", "totalProtein" ) );
+	ui->scrollAreaWidgetContents->layout()->addWidget( new TowerWidget(
+		ui->scrollAreaWidgetContents, "kjPer100Grams", "totalProtein" ) );
 }
 void MainWindow::createAddPortion() {
 	PortionAdder *p = new PortionAdder();

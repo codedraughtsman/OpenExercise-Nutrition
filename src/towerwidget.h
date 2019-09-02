@@ -9,8 +9,11 @@
 
 class TowerWidget : public QWidget {
 	Q_OBJECT
+	QString m_xAxis, m_yAxis;
+
   public:
-	TowerWidget( QWidget *parent = nullptr );
+	TowerWidget( QWidget *parent = nullptr, QString xAxis = "kjPer100Grams",
+				 QString yAxis = "totalKj" );
 
   private:
 	QVector<PortionCollection> m_portions;

@@ -4,15 +4,13 @@
 #include <QString>
 
 class Portion {
-	QString m_foodName;
-	uint m_grams;
-	float m_kj;
 
   public:
+	QString m_foodName;
+	uint m_xValue, m_yValue;
+
 	Portion();
-	Portion( QString foodName, uint grams );
-	QString getFoodName();
-	float getKj();
+	Portion( QString foodName, uint xValue, uint yValue );
 };
 
 #endif // PORTION_H

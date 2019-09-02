@@ -15,8 +15,9 @@
 #define DATE_FORMAT "yyyy-MM-dd"
 #define DATE_FORMAT_INPUT "yyyy'-'MM'-'dd"
 
-TowerWidget::TowerWidget( QWidget *parent )
-	: QWidget( parent ), m_axisColor( Qt::blue ) {
+TowerWidget::TowerWidget( QWidget *parent, QString xAxis, QString yAxis )
+	: QWidget( parent ), m_axisColor( Qt::blue ), m_xAxis( xAxis ),
+	  m_yAxis( yAxis ) {
 	QSqlDatabase db = QSqlDatabase::database();
 	db.driver()->subscribeToNotification( "someEventId" );
 	connect( &StorageManager::instance(), &StorageManager::dataChanged, this,
@@ -44,13 +45,34 @@ QVector<QDate> TowerWidget::getLastNDates( uint n ) {
 
 PortionCollection TowerWidget::loadPortion( QDate date ) {
 	QSqlQuery query;
+	/*
+		query.prepare( "select foodName, :xAxis, :yAxis from "
+					   "portionsPerDayPerFood where date = :date order by
+	   totalKj "
+					   "DESC" );
+		query.bindValue( ":xAxis", m_xAxis );
+		query.bindValue( ":yAxis", m_yAxis );
 
-	query.prepare( "select foodName, totalGrams, totalKj from "
-				   "portionsPerDayPerFood where date = ? order by totalKj "
+		query.bindValue( ":date", date.toString( DATE_FORMAT ) );
+	*/
+	/*
+	query.prepare( "select foodName, :xAxis, :yAxis from "
+				   "portionsPerDayPerFood where date = :date order by totalKj "
 				   "DESC" );
-	query.addBindValue( date.toString( DATE_FORMAT ) );
+	query.bindValue( ":xAxis", m_xAxis );
+	query.bindValue( ":yAxis", m_yAxis );
+	query.bindValue( ":date", date.toString( DATE_FORMAT ) );
+*/
+	query.prepare( "select foodName, " + m_xAxis + " , " + m_yAxis +
+				   " from "
+				   "portionsPerDayPerFood where date = :date order by " +
+				   m_yAxis + " DESC" );
 
+	query.bindValue( ":date", date.toString( DATE_FORMAT ) );
 	bool sucessful = query.exec();
+	qDebug() << "m_xAxis= " << m_xAxis << " m_yAxis " << m_yAxis;
+	qDebug() << "running query " << query.executedQuery();
+	qDebug() << "running query " << query.lastQuery();
 
 	if ( !sucessful ) {
 		qDebug() << "failed to load portions";
@@ -59,11 +81,11 @@ PortionCollection TowerWidget::loadPortion( QDate date ) {
 	PortionCollection portions;
 	while ( query.next() ) {
 		QString foodName = query.value( 0 ).toString();
-		uint grams = query.value( 1 ).toUInt();
-		uint kj = StorageManager::getKjPer100g( foodName ) * grams / 100;
-		// qDebug() << "foodName" << foodName << " grams " << grams << ", kj "
-		//		 << kj;
-		portions.addPortion( foodName, grams );
+		uint xValue = query.value( 1 ).toUInt();
+		uint yValue = query.value( 2 ).toUInt();
+		qDebug() << "foodName" << foodName << " xValue " << xValue
+				 << ", yValue " << yValue;
+		portions.addPortion( foodName, xValue, yValue );
 	}
 	return portions;
 }
@@ -102,19 +124,11 @@ void TowerWidget::paintTower( QRectF area, PortionCollection &portions ) {
 	QPen pen( Qt::black, penWidth );
 	painter.setPen( pen );
 	for ( Portion portion : portions.getPortions() ) {
-		QString foodName = portion.getFoodName();
-		uint kj = portion.getKj();
-		float drawHeight = convertKjToPixelsHeight( kj );
-		float drawWidth =
-			convertKjToPixelsWidth( StorageManager::getKjPer100g( foodName ) ) -
-			penWidth;
-		/*qDebug() << "\nfoodName" << foodName;
-		qDebug() << "draw width" << drawWidth << "getKjPer100g( foodName )"
-				 << StorageManager::getKjPer100g( foodName )
-				 << "m_kjPerPixelYAxis" << m_kjPerPixelHeight;
-		qDebug() << "draw height:" << drawHeight << "kj" << kj << "startHeight"
-				 << startHeight;
-		*/
+		QString foodName = portion.m_foodName;
+
+		float drawHeight = convertKjToPixelsHeight( portion.m_yValue );
+		float drawWidth = convertKjToPixelsWidth( portion.m_xValue );
+
 		QPainterPath path;
 		QRectF rect( area.left() + penWidth * 2, startHeight - drawHeight,
 					 drawWidth, drawHeight );
@@ -144,28 +158,25 @@ void TowerWidget::paintTower( QRectF area, PortionCollection &portions ) {
 }
 
 void TowerWidget::updateZoom( QRectF drawArea ) {
-	uint maxKjTower = 0, totalKjWidth = 0;
-	for ( PortionCollection portions : m_portions ) {
-		// qDebug() << "portions.getTotalKj() " << portions.getTotalKj();
-		if ( portions.getTotalKj() > maxKjTower ) {
-			maxKjTower = portions.getTotalKj();
-		}
-		totalKjWidth += portions.getMaxKjPer100g();
-	}
-	/*qDebug() << "maxKjTower" << maxKjTower << "m_portions" <<
-	m_portions.size();
-	qDebug() << "drawArea.height()" << drawArea.height() << "drawArea.width()"
-			 << drawArea.width();
-	*/
-	// m_kjPerPixelHeight = qMax( 4000u, maxKjTower ) / drawArea.height();
-	m_kjPerPixelHeight = maxKjTower / drawArea.height();
-	qDebug() << "m_kjPerPixelHeight" << m_kjPerPixelHeight;
+	uint towerWidth = 0, towerHeight = 0;
 
-	m_kjPerPixelWidth = totalKjWidth / ( drawArea.width() -
-										 ( 10.0 * ( m_portions.size() ) - 1 ) );
-	/*qDebug() << "m_kjPerPixelWidth" << m_kjPerPixelWidth << "totalKjWidth"
-			 << totalKjWidth;
-			 */
+	// for each tower get the width and height in the x and y
+	// values.
+	for ( PortionCollection portions : m_portions ) {
+		// select the highest tower as the height of the entire area.
+		towerHeight = qMax( towerHeight, portions.getTotalYValue() );
+		// combine the widths of all the towers to get the width of the area.
+		towerWidth += portions.getMaxXValue();
+	}
+
+	m_kjPerPixelHeight = towerHeight / drawArea.height();
+	double spaceBetweenTowers = ( 10.0 * ( m_portions.size() ) - 1 );
+	m_kjPerPixelWidth = towerWidth / ( drawArea.width() - spaceBetweenTowers );
+
+	qDebug() << "towerHeight: " << towerHeight << " ,towerWidth: " << towerWidth
+			 << " spaceBetweenTowers: " << spaceBetweenTowers
+			 << " m_kjPerPixelHeight: " << m_kjPerPixelHeight
+			 << " m_kjPerPixelWidth " << m_kjPerPixelWidth;
 }
 
 float TowerWidget::convertKjToPixelsWidth( uint kj ) {
@@ -235,7 +246,7 @@ void TowerWidget::paintEvent( QPaintEvent *event ) {
 	updateZoom( towerRect );
 	qreal towerXStart = xAxisMargin;
 	for ( PortionCollection portion : m_portions ) {
-		qreal towerWidth = convertKjToPixelsWidth( portion.getMaxKjPer100g() );
+		qreal towerWidth = convertKjToPixelsWidth( portion.getMaxXValue() );
 		QRectF towerRect( towerXStart, 0, towerWidth,
 						  area.height() - yAxisMargin );
 		paintTower( towerRect, portion );

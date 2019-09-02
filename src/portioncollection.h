@@ -10,15 +10,14 @@
 class PortionCollection {
 
 	QVector<Portion> m_portions;
-	uint m_maxKjPer100g, m_totalKj;
 
   public:
 	explicit PortionCollection();
-	// PortionCollection( PortionCollection &portion );
-	void addPortion( QString foodName, uint grams );
+	void addPortion( QString foodName, uint xValue, uint yValue );
 	const QVector<Portion> &getPortions();
-	uint getMaxKjPer100g();
-	uint getTotalKj();
+	uint getMaxXValue();
+	uint getTotalYValue();
+
   signals:
 
   public slots:

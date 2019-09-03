@@ -17,13 +17,11 @@ class TowerWidget : public QWidget {
 
   private:
 	QVector<PortionCollection> m_portions;
-	QMap<QString, QColor> m_portionColors;
 
 	double m_kjPerPixelWidth, m_kjPerPixelHeight;
 	QColor m_axisColor;
 	// uint getWidth();
 
-	QColor getColor( QString id );
 	void paintTower( QRectF area, PortionCollection &portions );
 	void updateZoom( QRectF drawArea );
 	void paintYAxis( QRectF area );

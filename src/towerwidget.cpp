@@ -6,7 +6,6 @@
 #include <QDebug>
 #include <QPaintEvent>
 #include <QPainter>
-#include <QRandomGenerator>
 #include <QSqlDriver>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -100,15 +99,6 @@ void TowerWidget::reloadData() {
 	this->repaint();
 }
 
-QColor TowerWidget::getColor( QString id ) {
-	if ( !m_portionColors.contains( id ) ) {
-		m_portionColors[ id ] =
-			QColor::fromRgb( QRandomGenerator::global()->generate() );
-	}
-
-	return m_portionColors[ id ];
-}
-
 void TowerWidget::paintTower( QRectF area, PortionCollection &portions ) {
 	// for each portion draw a rectangle.
 	// width is the kj per 100 grams.
@@ -134,7 +124,8 @@ void TowerWidget::paintTower( QRectF area, PortionCollection &portions ) {
 					 drawWidth, drawHeight );
 		path.addRoundedRect( rect, 10, 10 );
 
-		painter.fillPath( path, getColor( foodName ) );
+		painter.fillPath( path,
+						  StorageManager::instance().getColor( foodName ) );
 		painter.drawPath( path );
 
 		// painter.save();

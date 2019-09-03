@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
+#include <QRandomGenerator>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -31,6 +32,14 @@ void StorageManager::init() {
 	qDebug() << "trying to open " << path << ", " << db.open();
 
 	createTables();
+}
+QColor StorageManager::getColor( QString id ) {
+	if ( !m_portionColors.contains( id ) ) {
+		m_portionColors[ id ] =
+			QColor::fromRgb( QRandomGenerator::global()->generate() );
+	}
+
+	return m_portionColors[ id ];
 }
 void StorageManager::addFood( QString foodName, uint kjPer100g,
 							  uint gramsPerCup ) {

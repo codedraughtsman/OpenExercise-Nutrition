@@ -3,12 +3,15 @@
 
 #include "src_global.h"
 
+#include <QColor>
 #include <QDateTime>
 #include <QMap>
 #include <QObject>
 
 class SRCSHARED_EXPORT StorageManager : public QObject {
 	Q_OBJECT
+	QMap<QString, QColor> m_portionColors;
+
   public:
 	static void init();
 
@@ -21,6 +24,8 @@ class SRCSHARED_EXPORT StorageManager : public QObject {
 	static StorageManager &instance();
 
 	void addWeight( double weight, QDateTime dateTime );
+
+	QColor getColor( QString id );
 
   private:
 	StorageManager() {}

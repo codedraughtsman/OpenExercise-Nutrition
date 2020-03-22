@@ -32,7 +32,7 @@ void MainWindow::setupNutritionWindow() {
 	ui->scrollAreaWidgetContents->layout()->addWidget( new TowerWidget(
 		ui->scrollAreaWidgetContents, "proteinPer100Grams", "totalProtein" ) );
 	ui->scrollAreaWidgetContents->layout()->addWidget( new TowerWidget(
-		ui->scrollAreaWidgetContents, "kjPer100Grams", "totalProtein" ) );
+		ui->scrollAreaWidgetContents, "sodiumPer100Grams", "totalSodium" ) );
 }
 void MainWindow::createAddPortion() {
 	PortionAdder *p = new PortionAdder();

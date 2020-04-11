@@ -6,10 +6,9 @@
 
 QT       += widgets sql charts
 
-TARGET = src
-TEMPLATE = lib
+TARGET = app
+TEMPLATE = app
 
-DEFINES += SRC_LIBRARY
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -32,7 +31,8 @@ SOURCES += \
     portioncollection.cpp \
     portion.cpp \
     portionadder.cpp \
-    addfooddialog.cpp
+    addfooddialog.cpp \
+    main.cpp
 
 HEADERS += \
         linechartview.h \
